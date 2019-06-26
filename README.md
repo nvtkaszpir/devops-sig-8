@@ -2,24 +2,55 @@
 
 Minimal example app for lab under devops-sigs-8.
 
-Trying to use inotify and force killing processes in shared namesapce.
+# Use case
 
-When configmap is updated with kubectl then we must wait till
-they are updated in each pod (about 60s).
-Then `watcher` pod will detect change and will trigger killing of
-all processes in pod (because of shared namespace)
+We want to invoke app restart in pod in case of configmap update.
+Solution in here is to use inotify to detect config file change and killing processes in shared namespace within a kubernetes pod.
 
-Unfortunately it may lead to service unavailability (no endpoints).
+# Video
+
+https://youtu.be/mzuFoO6SWqk
 
 Steps to reproduce:
-- `kubectl apply -f k8s/``
+
+- ensure to have a working kubernetes context
+- `kubectl apply -f k8s/`
 - wait for replicas to come online
 - change config in `k8s/configmap.yaml`
-- run `kubectl apply -f k8s/`` again
+- run `kubectl apply -f k8s/` again to trigger configmap update
 - wait till configmap change is propagated across pods
 - see how pods are getting restarted in random fashion
+- look at the panels in the video.
+
+    + top left - services and endpoints, watch out for Endpoints.
+    + top right - pods from deployments, watch out for Restarts.
+    + bottom left - main apply console
+    + bottom right - logs streamed with https://github.com/wercker/stern
+
+
+Notice how long it takes between kubectl apply and actual config change
+in the volume in pods and how random it is.
+
+When configmap is updated with kubectl then we must wait until
+they are updated in each pod (random time from 0 to about 60 seconds).
+When configmap updated in volume then `watcher` container will detect the  change and will trigger killing of all processes in pod (because of the shared namespace). There is a log generated in such event.
+
+As we can see on the video it may lead to service unavailability - no endpoints marked as healthy due to liveness probes.
+
+# Conclusions
+Don't use it, it's not safe because configmap updates in pod are in random
+or depend on caching and so on. This solution may lead to service disruption,
+especially if replica count is low.
+
+Suggested solutions:
+
+- create new configmap and run new deployment (safest)
+- ensure your app is aware of config updates and reloads itself when config is changed and if it is valid
+- you may use https://github.com/stakater/Reloader
+- alternatives confd, envtpl, dynamic config from outside of k8s (consul?)
 
 # Quick howtos
+
 ## Creating k8s cluster using `kind`
 
 linux (make sure you have docker installed already)
