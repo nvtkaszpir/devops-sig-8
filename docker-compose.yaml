@@ -1,0 +1,21 @@
+---
+version: '3'
+
+services:
+  app:
+    image: kaszpir/devops-sig-8
+    volumes:
+      - app-config:/etc/app/:ro
+  watcher:
+    image: kaszpir/devops-sig-8-watcher
+    volumes:
+      - app-config:/etc/app/:ro
+  writer:
+    image: alpine:3.10
+    volumes:
+      - app-config:/etc/app/:rw
+    stdin_open: true
+    tty: true
+
+volumes:
+  app-config:

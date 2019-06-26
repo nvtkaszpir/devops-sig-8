@@ -2,6 +2,23 @@
 
 Minimal example app for lab under devops-sigs-8.
 
+Trying to use inotify and force killing processes in shared namesapce.
+
+When configmap is updated with kubectl then we must wait till
+they are updated in each pod (about 60s).
+Then `watcher` pod will detect change and will trigger killing of
+all processes in pod (because of shared namespace)
+
+Unfortunately it may lead to service unavailability (no endpoints).
+
+Steps to reproduce:
+- `kubectl apply -f k8s/``
+- wait for replicas to come online
+- change config in `k8s/configmap.yaml`
+- run `kubectl apply -f k8s/`` again
+- wait till configmap change is propagated across pods
+- see how pods are getting restarted in random fashion
+
 # Quick howtos
 ## Creating k8s cluster using `kind`
 

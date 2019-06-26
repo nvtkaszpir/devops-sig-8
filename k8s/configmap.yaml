@@ -5,4 +5,7 @@ metadata:
   name: devops-sig-8-configmap
 data:
   config.yaml: |
-    derp
+    ---
+    # dummy config, nothing here
+    # meow meow woof woof
+    ##

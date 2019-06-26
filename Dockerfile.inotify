@@ -1,0 +1,10 @@
+FROM alpine:3.10
+
+# install inotify package
+RUN apk update --no-cache && apk add inotify-tools=3.20.1-r1 && rm -rf /var/cache/apk/*
+
+# upload watch-config script
+COPY watch-config.sh /
+RUN chmod a+x watch-config.sh
+
+CMD ["./watch-config.sh"]
