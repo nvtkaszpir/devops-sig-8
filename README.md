@@ -19,6 +19,7 @@ kubectl cluster-info
 ```
 
 
+## Build container
 
 ```shell
 export DOCKER_USER=kaszpir
@@ -26,19 +27,22 @@ export DOCKER_PASS=hunter2
 make all
 ```
 
-# kubeval test
+# Kubernetes related
+
+## Test with kubeval
+
 ```shell
 make kubeval
 ```
 
-# deploy on k8s
+## Deploy on k8s
 
-remember to have proper k8s context active
+Remember to have proper k8s context active
 ```shell
 kubectl apply -f k8s/
 ```
 
-# scale test
+# Scale test
 first create example deployment:
 ```shell
 make k8s
@@ -111,3 +115,4 @@ Percentage of the requests served within a certain time (ms)
  100%     30 (longest request)
 pod "apachebench" deleted
 ```
+
