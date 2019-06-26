@@ -1,0 +1,52 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devops-sig-8-depl
+  labels:
+    app: devops-sig-8
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: devops-sig-8
+  template:
+    metadata:
+      labels:
+        app: devops-sig-8
+    spec:
+      volumes:
+        - name: devops-sig-8-vol
+          configMap:
+            name: devops-sig-8-configmap
+      terminationGracePeriodSeconds: 60  # gunicorn has 30s graceful exit by default
+      containers:
+        - name: app
+          image: "kaszpir/devops-sig-8:c4377977b517a9264fb3fb3b75c860c829928501"
+          imagePullPolicy: Always
+          ports:
+            - name: app
+              containerPort: 8000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /const
+              port: 8000
+            timeoutSeconds: 5
+            periodSeconds: 2
+            initialDelaySeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /const
+              port: 8000
+            timeoutSeconds: 5
+            periodSeconds: 2
+            initialDelaySeconds: 10
+          volumeMounts:
+            - name: devops-sig-8-vol
+              mountPath: /etc/app/
+          lifecycle:
+            preStop:
+              exec:
+                # graceful shutdown of gunicorn
+                command: ["/bin/sh", "-c", "killall5 15;sleep 10;"]
